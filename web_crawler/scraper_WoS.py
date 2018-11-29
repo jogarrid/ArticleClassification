@@ -79,7 +79,6 @@ class WosClient():
                                 ('count', count),
                                 ('sortField', _OrderedDict([('name', 'RS'),
                                                             ('sort', 'D')]))])
-
         return self._search.service.search(qparams, rparams)
 
     def single(wosclient, wos_query, xml_query=None, count=10, offset=1):
