@@ -1,0 +1,4 @@
+# Alex's files
+.ipynb_checkpoints
+catboost_info/
+data/pretrained_models/
