@@ -66,7 +66,7 @@ class WosClient():
             self._auth.service.closeSession()
             self._SID = None
 
-    def search(self, query, count=5, offset=1):
+    def search(self, query, count=100, offset=1):
         """Perform a query. Check the WOS documentation for v3 syntax."""
         if not self._SID:
             raise RuntimeError('Session not open. Invoke .connect() before.')
@@ -79,6 +79,7 @@ class WosClient():
                                 ('count', count),
                                 ('sortField', _OrderedDict([('name', 'RS'),
                                                             ('sort', 'D')]))])
+        time.sleep(0.5)
         return self._search.service.search(qparams, rparams)
 
     def single(wosclient, wos_query, xml_query=None, count=10, offset=1):
