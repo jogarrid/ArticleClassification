@@ -1,9 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[2]:
-
-
 import argparse
 
 import pandas as pd
@@ -57,23 +51,80 @@ def get_mean_w2v_embeddings(titles):
         embs.append(title_emb)
     return embs
 
-kicked = pd.read_csv('data/DISMISSED_final.csv')
-stayed = pd.read_csv('data/UNDISMISSED_final.csv')
 
-kicked1 = kicked[['Authors','title', 'labels']]
-stayed1 = stayed[['author','title', 'labels']]
-stayed1 = stayed1.sample(frac=(1.0 * kicked.shape[0])/stayed.shape[0]) # random_state = 0
+# In[3]:
 
-df0 = pd.concat([kicked1, stayed1])
 
+get_ipython().system('ls')
+
+
+# In[4]:
+
+
+
+fired = pd.read_csv('data/DISMISSED_final.csv')
+not_fired = pd.read_csv('data/UNDISMISSED_final.csv')
+
+#Eliminate non-letters from author name's
+not_fired['author'] = not_fired['author'].apply(lambda s: re.sub(r"[.,/()?:'%\";\[\]!\{\}><]", "", s))
+
+fired = fired.drop('Unnamed: 0', axis = 1)
+fired = fired.drop('Unnamed: 0.1', axis = 1)
+fired = fired.drop('Authors', axis = 1)
+fired = fired.drop('Query', axis = 1)
+not_fired = not_fired.drop('Unnamed: 0', axis = 1)
+
+not_fired.columns = ['Abstract', 'Author','Co-authors', 'Heading', 'Keywords', 'Organization',
+                    'Publish date', 'Publication type','Source', 'Title paper', 'Label']
+
+ordered = ['abstract', 'author', 'co-authors', 'headings', 'keywords', 'organisation', 
+                  'publish_date', 'pubtype', 'source', 'title', 'labels']
+fired = fired[ordered]
+fired.columns = ['Abstract', 'Author','Co-authors', 'Heading', 'Keywords', 'Organization',
+                    'Publish date', 'Publication type','Source', 'Title paper', 'Label']
+
+fired.reset_index(drop = True)
+
+fired1 = fired[['Author','Source','Keywords','Title paper','Label']]
+not_fired1 = not_fired[['Author','Source','Keywords','Title paper','Label']]
+
+df0 = pd.concat([fired1, not_fired1])
+df0 = df0.reset_index(drop = True)
 df1 = df0.copy()
-df1['Authors'] = df0['Authors'].apply(lambda x: x[3:])
-df1['Label'] = df0['labels'].apply(lambda x: int(x))
-df1['Title paper'] = df0['title'].apply(lambda s: s[1:][:-1])
-df1 = df1.drop(columns=['labels'])
+df1['Keywords'] = df0['Keywords'].apply(lambda s: s[1:][:-1])
 
-df2 = df1[df1['Authors'].apply(lambda s : len(s) >= 6)]
 
+# In[5]:
+
+
+#1st, we throw away very short last names
+authors = []
+thrown = []
+for i in range(len(df1)):
+    #We throw away second last name
+    author_l = df1['Author'][i].strip().split(' ')[0:2]
+    if(len(author_l) <2 or len(author_l[1]) <2):
+        if(author_l not in thrown):
+            thrown.append(author_l)
+        df1 = df1.drop(i, axis = 0)
+    else: 
+        author = ' '.join(author_l)
+        authors.append(author)
+df1['Author'] = authors
+df1 = df1.reset_index(drop = True)
+print('We threw away... ' + str(len(thrown)) + " authors because their last name only has 1 letter.")
+
+
+# In[6]:
+
+
+network_pd = pd.read_csv('data/network.csv')
+
+
+# In[7]:
+
+
+df2 = df1[df1['Author'].apply(lambda s : len(s) >= 6)]
 df3 = df2.copy()
 df3['Title paper'] = df2['Title paper'].apply(
     lambda s : s.lower()
@@ -88,6 +139,21 @@ df3['Title paper'] = df2['Title paper'].apply(
 ).apply(
     lambda s : re.sub(r"\s+", " ", s) # substitute multiple spaces with one
 )
+
+df3['Source'] = df2['Source'].apply(
+    lambda s : s.lower()
+).apply(
+    lambda s : re.sub(r"[.,/()?:'%\";\[\]!\{\}><]", "", s) # delete all not-letters
+).apply(
+    lambda s : re.sub(r"[- + = @ & * # |]", " ", s) # substitute defis with spaces
+).apply(
+    lambda s : re.sub(r"\d", " ", s) # substitute numbers with spaces
+).apply(
+    lambda s : re.sub(r"\W\w{1,2}\W", " ", s) # naive removal of super-short words
+).apply(
+    lambda s : re.sub(r"\s+", " ", s) # substitute multiple spaces with one
+)
+
 df3 = df3[df3['Title paper'].apply(
     lambda s: s != 'untitled' and s != 'editorial' # drop some common but not-interesting names
 )]
@@ -96,51 +162,66 @@ df3 = df3[df3['Title paper'].apply(
 symbols = df3['Title paper'].apply(
     lambda s: ''.join(c for c in s if not c.isalpha() and c != ' ')
 )
+# try to find strange symbols in "Title paper" and print them 
+symbols = df3['Source'].apply(
+    lambda s: ''.join(c for c in s if not c.isalpha() and c != ' ')
+)
 
-# okay, now in df3 in "Title paper" we have clean sentences, great, analysis should work
-
-df4 = df3.drop(columns=['Authors'])
+df4 = df3.drop(columns=['Author'])
 df4.head()
 
+
+# In[9]:
+
+
 titles_num = df4.shape[0]
-kicked_titles_num = df4[df4['Label'] == 1].shape[0]
-stayed_titles_num = df4[df4['Label'] == 0].shape[0]
+fired_titles_num = df4[df4['Label'] == 1].shape[0]
+notfired_titles_num = df4[df4['Label'] == 0].shape[0]
 print('For first dataset we have ' + str(titles_num) + ' titles, from them ' + str(kicked_titles_num) + ' kicked and ' + str(stayed_titles_num) + ' stayed')
 
 # authors_num = len()
 
 titles_per_author = {} # author -> article
+sources_per_author ={}
 labels_per_author = {} # author -> label
 
 for i, r in df3.iterrows():
-    author = r['Authors']
+    author = r['Author']
     title = r['Title paper']
     label = int(r['Label'])
+    source = r['Source']
     
     titles_per_author[author] = titles_per_author.get(author, '') + ' ' + title # do concatenation
+    sources_per_author[author] = sources_per_author.get(author, '') + ' ' + source # do concatenation
     labels_per_author[author] = label
 
-kicked_cnt = 0
+fired_cnt = 0
 for k, v in labels_per_author.items():
-    if v == 1: kicked_cnt+= 1
+    if v == 1: fired_cnt+= 1
         
+
+
+# In[11]:
+
+
 authors = []
 titles = []
+sources = []
 labels = []
-stayed_limit = kicked_cnt
+notfired_limit = fired_cnt
 
 for k, v in titles_per_author.items():
     if labels_per_author[k] == 0:
-        if stayed_limit > 0: stayed_limit -= 1
+        if notfired_limit > 0: notfired_limit -= 1
         else: continue
     
     authors.append(k)
     titles.append(re.sub(r"\s+", " ", v))    
     labels.append(labels_per_author[k])
+    sources.append(re.sub(r"\s+", " ", sources_per_author[k]))
     
 # aggregated DataFrame
-adf4 = pd.DataFrame(data={'Title paper' : titles, 'Label' : labels, 'Author': authors}) # columns names are ugly, but for backwards-compatibility
-
+adf4 = pd.DataFrame(data={'Title paper' : titles, 'Source': sources, 'Label' : labels, 'Author': authors}) # columns names are ugly, but for backwards-compatibility
 
 labels_per_titles = {}
 same_duplicate = 0
@@ -168,32 +249,74 @@ adf5 = adf4[
     )
 ]
 
+adf5= adf5.reset_index()
+
+
+# In[15]:
+
+
 print('New dataset size after duplicates removal is ' + str(adf5.shape[0]))
-
-
 df = adf5
 
 
+# In[17]:
+
+
+network_pd
+
+
+# In[21]:
+
+
+num_fired_l = []
+num_nofired_l = []
+
+for author in df['Author']:
+    author = ' '.join(author.strip().split(' ')[0:2])
+    row = network_pd.loc[network_pd['Author'] == author]
+    #Number fired&not fired connections
+    num_fired = row['Connections_fired'].values
+    num_nofired = row['Connections_nofired'].values
+    if(len(num_fired)>0):
+        num_fired_l.append(num_fired[0])
+        num_nofired_l.append(num_nofired[0])
+    else: 
+        num_fired_l.append(0)
+        num_nofired_l.append(0)
+        print('There was an error in finding the author... ', author)
+
+
+# In[22]:
+
+
+df['Num Fired'] = per_fired
+df['Num not fired'] = per_fired
+
 data_train, data_test = train_test_split(df, test_size= TEST_SIZE) # random_state = 0
 
-X_train = data_train['Title paper']
-y_train = data_train['Label']
+X_train_title = data_train['Title paper']
+X_train_source = data_train['Source']
 
-X_test = data_test['Title paper']
-y_test = data_test['Label']
+y_train_title = data_train['Label']
 
-print('Train size: ' + str(X_train.shape[0]) + ' vs test size: ' + str(X_test.shape[0]))
 
-X_train_embs = get_mean_w2v_embeddings(X_train)
-X_test_embs  = get_mean_w2v_embeddings(X_test)
+X_test_title = data_test['Title paper']
+X_test_source = data_test['Source']
+y_test_title = data_test['Label']
 
-data_train['Title vector'] = pd.Series(X_train_embs, index=data_train.index)
-data_test['Title vector'] = pd.Series(X_test_embs, index=data_test.index)
+print('Train size: ' + str(X_train_title.shape[0]) + ' vs test size: ' + str(X_test_title.shape[0]))
+
+X_train_title_embs = get_mean_w2v_embeddings(X_train_title)
+X_test_title_embs  = get_mean_w2v_embeddings(X_test_title)
+X_train_source_embs = get_mean_w2v_embeddings(X_train_source)
+X_test_source_embs  = get_mean_w2v_embeddings(X_test_source)
+
+data_train['Title vector'] = pd.Series(X_train_title_embs, index=data_train.index)
+data_test['Title vector'] = pd.Series(X_test_title_embs, index=data_test.index)
+
+data_train['Source vector'] = pd.Series(X_train_source_embs, index=data_train.index)
+data_test['Source vector'] = pd.Series(X_test_source_embs, index=data_test.index)
 
 data_train.to_csv('data_train.csv')
 data_train.to_csv('data_test.csv')
-
-
-
-
 
