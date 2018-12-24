@@ -57,22 +57,22 @@ def get_mean_w2v_embeddings(titles):
         embs.append(title_emb)
     return embs
 
-kicked = pd.read_csv('data/dismissed_complete.csv')
-stayed = pd.read_csv('data/nodismissed_complete.csv')
+kicked = pd.read_csv('data/DISMISSED_final.csv')
+stayed = pd.read_csv('data/UNDISMISSED_final.csv')
 
-kicked1 = kicked[['Author','Title paper', 'labels']]
-stayed1 = stayed[['Author','Title paper', 'labels']]
+kicked1 = kicked[['Authors','title', 'labels']]
+stayed1 = stayed[['author','title', 'labels']]
 stayed1 = stayed1.sample(frac=(1.0 * kicked.shape[0])/stayed.shape[0]) # random_state = 0
 
 df0 = pd.concat([kicked1, stayed1])
 
 df1 = df0.copy()
-df1['Author'] = df0['Author'].apply(lambda x: x[3:])
+df1['Authors'] = df0['Authors'].apply(lambda x: x[3:])
 df1['Label'] = df0['labels'].apply(lambda x: int(x))
-df1['Title paper'] = df0['Title paper'].apply(lambda s: s[1:][:-1])
+df1['Title paper'] = df0['title'].apply(lambda s: s[1:][:-1])
 df1 = df1.drop(columns=['labels'])
 
-df2 = df1[df1['Author'].apply(lambda s : len(s) >= 6)]
+df2 = df1[df1['Authors'].apply(lambda s : len(s) >= 6)]
 
 df3 = df2.copy()
 df3['Title paper'] = df2['Title paper'].apply(
@@ -99,7 +99,7 @@ symbols = df3['Title paper'].apply(
 
 # okay, now in df3 in "Title paper" we have clean sentences, great, analysis should work
 
-df4 = df3.drop(columns=['Author'])
+df4 = df3.drop(columns=['Authors'])
 df4.head()
 
 titles_num = df4.shape[0]
@@ -113,7 +113,7 @@ titles_per_author = {} # author -> article
 labels_per_author = {} # author -> label
 
 for i, r in df3.iterrows():
-    author = r['Author']
+    author = r['Authors']
     title = r['Title paper']
     label = int(r['Label'])
     
