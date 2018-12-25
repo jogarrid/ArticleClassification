@@ -25,7 +25,7 @@ if(args.test_size == None):
 else: 
     TEST_SIZE = args.test_size
 
-word2vec_model = gensim.models.KeyedVectors.load_word2vec_format('GoogleNews-vectors-negative300.bin.gz', binary=True)  
+word2vec_model = gensim.models.KeyedVectors.load_word2vec_format('data/GoogleNews-vectors-negative300.bin.gz', binary=True)  
 
 def isEnglish(s):
     try:
@@ -51,19 +51,8 @@ def get_mean_w2v_embeddings(titles):
         embs.append(title_emb)
     return embs
 
-
-# In[3]:
-
-
-get_ipython().system('ls')
-
-
-# In[4]:
-
-
-
-fired = pd.read_csv('data/DISMISSED_final.csv')
-not_fired = pd.read_csv('data/UNDISMISSED_final.csv')
+fired = pd.read_csv('data/fired_final.csv')
+not_fired = pd.read_csv('data/not_fired_final.csv')
 
 #Eliminate non-letters from author name's
 not_fired['author'] = not_fired['author'].apply(lambda s: re.sub(r"[.,/()?:'%\";\[\]!\{\}><]", "", s))
@@ -177,7 +166,7 @@ df4.head()
 titles_num = df4.shape[0]
 fired_titles_num = df4[df4['Label'] == 1].shape[0]
 notfired_titles_num = df4[df4['Label'] == 0].shape[0]
-print('For first dataset we have ' + str(titles_num) + ' titles, from them ' + str(kicked_titles_num) + ' kicked and ' + str(stayed_titles_num) + ' stayed')
+print('For first dataset we have ' + str(titles_num) + ' titles, from them ' + str(fired_titles_num) + ' kicked and ' + str(notfired_titles_num) + ' stayed')
 
 # authors_num = len()
 
@@ -199,11 +188,6 @@ fired_cnt = 0
 for k, v in labels_per_author.items():
     if v == 1: fired_cnt+= 1
         
-
-
-# In[11]:
-
-
 authors = []
 titles = []
 sources = []
@@ -249,7 +233,7 @@ adf5 = adf4[
     )
 ]
 
-adf5= adf5.reset_index()
+adf5= adf5.reset_index(drop = True)
 
 
 # In[15]:
@@ -285,12 +269,8 @@ for author in df['Author']:
         num_nofired_l.append(0)
         print('There was an error in finding the author... ', author)
 
-
-# In[22]:
-
-
-df['Num Fired'] = per_fired
-df['Num not fired'] = per_fired
+df['Num Fired'] = num_fired_l
+df['Num not fired'] = num_nofired_l
 
 data_train, data_test = train_test_split(df, test_size= TEST_SIZE) # random_state = 0
 
@@ -311,12 +291,12 @@ X_test_title_embs  = get_mean_w2v_embeddings(X_test_title)
 X_train_source_embs = get_mean_w2v_embeddings(X_train_source)
 X_test_source_embs  = get_mean_w2v_embeddings(X_test_source)
 
-data_train['Title vector'] = pd.Series(X_train_title_embs, index=data_train.index)
-data_test['Title vector'] = pd.Series(X_test_title_embs, index=data_test.index)
+data_train.loc[:,'Title vector'] = pd.Series(X_train_title_embs, index=data_train.index)
+data_test.loc[:,'Title vector'] = pd.Series(X_test_title_embs, index=data_test.index)
 
-data_train['Source vector'] = pd.Series(X_train_source_embs, index=data_train.index)
-data_test['Source vector'] = pd.Series(X_test_source_embs, index=data_test.index)
+data_train.loc[:,'Source vector'] = pd.Series(X_train_source_embs, index=data_train.index)
+data_test.loc[:,'Source vector'] = pd.Series(X_test_source_embs, index=data_test.index)
 
-data_train.to_csv('data_train.csv')
-data_train.to_csv('data_test.csv')
+data_train.to_csv('data/data_train.csv')
+data_train.to_csv('data/data_test.csv')
 
