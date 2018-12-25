@@ -75,19 +75,9 @@ def construct_dataset(Soup,requested_aut):
 		names_list = names.find_all('name')
 		name_info_dict = {}
 		for name in names_list:
-			# Basic name info
-			#daisng_id = name.get('daisng_id') 
-			#role = name.get('role') 
-			#seq_no = name.get('seq_no') 
-			#display_name = name.find('display_name').text
 			full_name = name.find('full_name').text
 			full_name = full_name.replace(',','').upper()
-			# Zip as a dictionary and add to list
-			#name_info_personal = {'daisng_id':daisng_id,\
-			#				  'role':role,\
-			#				  'seq_no':seq_no,\
-			#				  'display_name': display_name}
-			#name_info_personal = {'full_name':full_name}
+
 			co_auths.append(full_name)
 			name_info_personal = {'full _name',full_name}
 			#data_authors.append({'author': full_name,'organisation': organization})
@@ -116,26 +106,16 @@ def construct_dataset(Soup,requested_aut):
 					#data_authors.append({'author': full_name,'organisation': add})
 				name_info_dict.update({full_name:name_info_personal})
 			#print('resquested author',requested_aut)
-		data.append({'author': requested_aut,
-				'title': title, 
-				'co-authors':co_auths,
-				'organisation':add,
-				 #'uid': uid, 
-				 'publish_date': publish_date,
-				 #'vol':vol,
-				 'pubtype':pubtype,
-				 #'issue':issue,
-				 #'language':language,
-				 #'doctype':doctype,
-				 'source':source,
-				 #'name_info':name_info_dict,
-				 'keywords':keywords,
-				 'headings':headings,
-				 #'category_info':category_info,
-				 'abstract':abstract})
-
-	#	data_authors.append({'author': full_name,
-	#		'organisation': append})
+		data.append({'Abstract':abstract,
+				'Author': requested_aut,
+				'Co-authors':co_auths,
+				'Heading':headings,
+				'Keywords':keywords,
+				'Organisation':add,
+				'Publish_date': publish_date,
+				'Publication type':pubtype,
+				'Source':source,
+				'Title paper': title})
 	publications = pd.DataFrame.from_dict(data)
 	#authors = pd.DataFrame.from_dict(data_authors)
 
