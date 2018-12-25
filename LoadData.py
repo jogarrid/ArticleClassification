@@ -82,11 +82,7 @@ df0 = df0.reset_index(drop = True)
 df1 = df0.copy()
 df1['Keywords'] = df0['Keywords'].apply(lambda s: s[1:][:-1])
 
-
-# In[5]:
-
-
-#1st, we throw away very short last names
+#1st, we throw away second last names and authors with last names of only 1 letter
 authors = []
 thrown = []
 for i in range(len(df1)):
@@ -99,22 +95,21 @@ for i in range(len(df1)):
     else: 
         author = ' '.join(author_l)
         authors.append(author)
+        
 df1['Author'] = authors
 df1 = df1.reset_index(drop = True)
-print('We threw away... ' + str(len(thrown)) + " authors because their last name only has 1 letter.")
 
-
-# In[6]:
-
+print('Finished processing the author names')
+print('----------------------------------------------------')
+#Debugging
+#print('We threw away... ' + str(len(thrown)) + " authors because their last name only has 1 letter.")
 
 network_pd = pd.read_csv('data/network.csv')
 
-
-# In[7]:
-
-
 df2 = df1[df1['Author'].apply(lambda s : len(s) >= 6)]
 df3 = df2.copy()
+
+#clean data 
 df3['Title paper'] = df2['Title paper'].apply(
     lambda s : s.lower()
 ).apply(
@@ -147,7 +142,8 @@ df3 = df3[df3['Title paper'].apply(
     lambda s: s != 'untitled' and s != 'editorial' # drop some common but not-interesting names
 )]
 
-# try to find strange symbols in "Title paper" and print them 
+"""
+# try to find strange symbols in "Title paper" and in "Source" and print them, for debugging 
 symbols = df3['Title paper'].apply(
     lambda s: ''.join(c for c in s if not c.isalpha() and c != ' ')
 )
@@ -155,23 +151,21 @@ symbols = df3['Title paper'].apply(
 symbols = df3['Source'].apply(
     lambda s: ''.join(c for c in s if not c.isalpha() and c != ' ')
 )
+"""
+
+print('Finished processing the titles and the sources')
+print('----------------------------------------------------')
 
 df4 = df3.drop(columns=['Author'])
 df4.head()
 
-
-# In[9]:
-
-
 titles_num = df4.shape[0]
 fired_titles_num = df4[df4['Label'] == 1].shape[0]
 notfired_titles_num = df4[df4['Label'] == 0].shape[0]
-print('For first dataset we have ' + str(titles_num) + ' titles, from them ' + str(fired_titles_num) + ' kicked and ' + str(notfired_titles_num) + ' stayed')
-
-# authors_num = len()
+print('We have ' + str(titles_num) + ' titles, from them ' + str(fired_titles_num) + ' fired and ' + str(notfired_titles_num) + ' not fired')
 
 titles_per_author = {} # author -> article
-sources_per_author ={}
+sources_per_author ={} # author -> source
 labels_per_author = {} # author -> label
 
 for i, r in df3.iterrows():
@@ -205,7 +199,7 @@ for k, v in titles_per_author.items():
     sources.append(re.sub(r"\s+", " ", sources_per_author[k]))
     
 # aggregated DataFrame
-adf4 = pd.DataFrame(data={'Title paper' : titles, 'Source': sources, 'Label' : labels, 'Author': authors}) # columns names are ugly, but for backwards-compatibility
+adf4 = pd.DataFrame(data={'Title paper' : titles, 'Source': sources, 'Label' : labels, 'Author': authors}) 
 
 labels_per_titles = {}
 same_duplicate = 0
@@ -224,7 +218,7 @@ for i, r in adf4.iterrows():
         labels_per_titles[title] = label
         
         
-# to clean the data, let's throw away all the duplicates at all, both same and diff, everyone, who meets > 1 times
+# throw away all the duplicates, both same and diff, everyone, who meets > 1 times
 counter = Counter(adf4['Title paper'])
 
 adf5 = adf4[
@@ -235,22 +229,8 @@ adf5 = adf4[
 
 adf5= adf5.reset_index(drop = True)
 
-
-# In[15]:
-
-
-print('New dataset size after duplicates removal is ' + str(adf5.shape[0]))
+print('We train and test the network with ' + str(adf5.shape[0]) + ' authors')
 df = adf5
-
-
-# In[17]:
-
-
-network_pd
-
-
-# In[21]:
-
 
 num_fired_l = []
 num_nofired_l = []
@@ -267,7 +247,7 @@ for author in df['Author']:
     else: 
         num_fired_l.append(0)
         num_nofired_l.append(0)
-        print('There was an error in finding the author... ', author)
+        print('There was an error in finding the author in the network database... ', author)
 
 df['Num Fired'] = num_fired_l
 df['Num not fired'] = num_nofired_l
@@ -276,13 +256,11 @@ data_train, data_test = train_test_split(df, test_size= TEST_SIZE) # random_stat
 
 X_train_title = data_train['Title paper']
 X_train_source = data_train['Source']
-
-y_train_title = data_train['Label']
-
+y_train = data_train['Label']
 
 X_test_title = data_test['Title paper']
 X_test_source = data_test['Source']
-y_test_title = data_test['Label']
+y_test = data_test['Label']
 
 print('Train size: ' + str(X_train_title.shape[0]) + ' vs test size: ' + str(X_test_title.shape[0]))
 
