@@ -1,6 +1,6 @@
 How to run the code?
 
-web_crawler: contains the scrapping of Web of Science to get paper information (title, author, co-authors, publication type, abstract, title etc.) and creates DISMISSED_final.csv and UNDISMISSED_final.csv.
+web_crawler: contains the scrapping of Web of Science to get paper information (title, author, co-authors, publication type, abstract, title etc.) and creates fired.csv and not_fired.csv.
 
 data_analysis: contains a notebook for the preliminary study of the dataset
 
