@@ -1,5 +1,10 @@
 How to run the code?
 
+Download https://drive.google.com/file/d/0B7XkCwpI5KDYNlNUTTlSS21pQmM/edit
+place it in the data folder
+
+Organisation of the code:
+
 web_crawler: contains the scrapping of Web of Science to get paper information (title, author, co-authors, publication type, abstract, title etc.) and creates fired.csv and not_fired.csv.
 
 data_analysis: contains a notebook for the preliminary study of the dataset
