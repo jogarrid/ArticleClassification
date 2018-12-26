@@ -11,7 +11,7 @@ from textRepresentations import *
 
 from collections import Counter
 
-import sent2vec # epfl-made 
+#import sent2vec # epfl-made 
 
 parser = argparse.ArgumentParser(description='Obtaining all the text representations we use for classification.')
 
