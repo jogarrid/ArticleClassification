@@ -157,32 +157,10 @@ for k, v in titles_per_author.items():
     
 # aggregated DataFrame
 adf4 = pd.DataFrame(data={'Title paper' : titles, 'Source': sources, 'No titles': no_titles, 'Label' : labels, 'Author': authors}) 
-
-labels_per_titles = {}
-same_duplicate = 0
-diff_duplicate = 0
-
-# we assume, that noone meets 3 times, which +- correct
-for i, r in adf4.iterrows():
-    title = r['Title paper']
-    label = int(r['Label'])
-    if title in labels_per_titles:
-        if labels_per_titles[title] == label:
-            same_duplicate += 1
-        else:
-            diff_duplicate += 1
-    else:
-        labels_per_titles[title] = label
         
-        
-# throw away all the duplicates, both same and diff, everyone, who meets > 1 times
+# throw away all the duplicates:
 counter = Counter(adf4['Title paper'])
-
-adf5 = adf4[
-    adf4['Title paper'].apply(
-        lambda title: counter[title] == 1
-    )
-]
+adf5 = adf4[adf4['Title paper'].apply(lambda title: counter[title] == 1)]
 
 adf5= adf5.reset_index(drop = True)
 
