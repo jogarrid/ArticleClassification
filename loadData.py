@@ -226,6 +226,5 @@ df.loc[:,'Source w2vtf'] = pd.Series(X_title_w2vtf, index=df.index)
 #df.loc[:,'Title s2v'] = pd.Series(X_title_s2v, index=df.index)
 #df.loc[:,'Source s2v'] = pd.Series(X_title_s2v, index=df.index)
 
-df = df.drop('Unnamed: 0', axis = 1) #drop extra column that appears because of concatenation
 df.to_csv('data/data_preprocessed.csv')
 
