@@ -38,10 +38,10 @@ data_test = data_test.reset_index(drop = True)
 
 from catboost import CatBoostClassifier
 
-X_train = data_train['Title w2v']
+X_train = np.array([data_train['Title w2v'][i]+[data_train['Num Fired'][i]]+[data_train['Num not fired'][i]] +[data_train['No titles'][i]] for i in range(len(data_train))])
 y_train = data_train['Label']
 
-X_test = data_test['Title w2v']
+X_test = np.array([data_test['Title w2v'][i]+[data_test['Num Fired'][i]]+[data_test['Num not fired'][i]] +[data_test['No titles'][i]] for i in range(len(data_test))])
 y_test = data_test['Label']
 
 model = CatBoostClassifier(iterations=20, learning_rate=1e-1, depth=6, loss_function='Logloss')
@@ -52,10 +52,10 @@ w2v_res = np.mean(preds_class == y_test)
 
 print('Gradient boosting via catboost gives accuracy of {:.2f} when applied to w2v mean concatenated titles'.format(w2v_res))
 
-X_train = data_train['Title w2vtf']
+X_train = np.array([data_train['Title w2vtf'][i]+[data_train['Num Fired'][i]]+[data_train['Num not fired'][i]] +[data_train['No titles'][i]] for i in range(len(data_train))])
 y_train = data_train['Label']
 
-X_test = data_test['Title w2vtf']
+X_test = np.array([data_test['Title w2vtf'][i]+[data_test['Num Fired'][i]]+[data_test['Num not fired'][i]] +[data_test['No titles'][i]] for i in range(len(data_test))])
 y_test = data_test['Label']
 
 model = CatBoostClassifier(iterations=20, learning_rate=1e-1, depth=6, loss_function='Logloss')
@@ -66,10 +66,10 @@ w2vtf_res = np.mean(preds_class == y_test)
 
 print('Gradient boosting via catboost gives accuracy of {:.2f} when applied to w2v concatenated titles with term frequency'.format(w2vtf_res))
 
-X_train = data_train['sent2vec']
+X_train = np.array([data_train['sent2vec'][i]+[data_train['Num Fired'][i]]+[data_train['Num not fired'][i]] +[data_train['No titles'][i]] for i in range(len(data_train))])
 y_train = data_train['Label']
 
-X_test = data_test['sent2vec']
+X_test = np.array([data_test['sent2vec'][i]+[data_test['Num Fired'][i]]+[data_test['Num not fired'][i]] +[data_test['No titles'][i]] for i in range(len(data_test))])
 y_test = data_test['Label']
 
 model = CatBoostClassifier(iterations=20, learning_rate=1e-1, depth=6, loss_function='Logloss')
