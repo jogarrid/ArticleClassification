@@ -18,16 +18,17 @@ args = parser.parse_args()
 print('Data is going to be loaded, text represented as a vector in different ways, and the network of authors built. This could take a while')
 
 word2vec_model = gensim.models.KeyedVectors.load_word2vec_format('data/GoogleNews-vectors-negative300.bin.gz', binary=True)  
+
 print('Finished loading googles word2vec pretrained model')
 print('----------------------------------------------------')
 
 fired = pd.read_csv('data/fired.csv')
 not_fired = pd.read_csv('data/not_fired.csv')
 
-not_fired['Author'] = not_fired['Author'].apply(lambda s: re.sub(r"[.,/()?:'%\";\[\]!\{\}><]", "", s)) #Eliminate non-letters from author names
-
 df0 = pd.concat([fired, not_fired])
 df0 = df0.reset_index(drop = True)
+
+df0['Author'] = df0['Author'].apply(lambda s: re.sub(r"[.,/()?:'%\";\[\]!\{\}><]", "", s)) #Eliminate non-letters from author names
 
 df1 = df0.copy()
 df1['Keywords'] = df0['Keywords'].apply(lambda s: s[1:][:-1])
@@ -61,6 +62,7 @@ if(not os.path.exists('data/network.csv')):
     network_pd = build_network(fired)
 else:
     network_pd = pd.read_csv('data/network.csv')
+
 print("Finished building/loading the network")
 print('----------------------------------------------------')
 
@@ -112,7 +114,7 @@ print('We have ' + str(titles_num) + ' titles, from them ' + str(fired_titles_nu
 
 titles_per_author = {} # author -> article
 sources_per_author ={} # author -> source
-no_per_author = {}  # author -> number of publications
+no_per_author = {}     # author -> number of publications
 labels_per_author = {} # author -> label
 
 for i, r in df3.iterrows():
@@ -142,7 +144,6 @@ for k, v in titles_per_author.items():
     if labels_per_author[k] == 0:
         if notfired_limit > 0: notfired_limit -= 1
         else: continue
-    
     authors.append(k)
     titles.append(re.sub(r"\s+", " ", v))    
     labels.append(labels_per_author[k])
