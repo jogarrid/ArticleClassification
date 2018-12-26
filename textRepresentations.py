@@ -64,3 +64,9 @@ def get_tfidf_w2v_embeddings(titles, word2vec_model):
         embs.append(title_emb)
     return embs
 
+def get_sent2vec_embeddings(titles, sent2vec_model):
+    lists = sent2vec_model.embed_sentences(titles.values)
+    return [np.asarray(lists[i]) for i in range(len(lists))]
+
+    return sent2vec_model.embed_sentences(titles.values)
+
