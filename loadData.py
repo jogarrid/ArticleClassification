@@ -11,7 +11,7 @@ from textRepresentations import *
 
 from collections import Counter
 
-import sent2vec # epfl-made 
+#import sent2vec # epfl-made 
 
 parser = argparse.ArgumentParser(description='Obtaining all the text representations we use for classification.')
 
@@ -58,7 +58,7 @@ df1 = df1.reset_index(drop = True)
 
 print('Finished processing the author names')
 print('----------------------------------------------------')
-#Debugging
+#Debugging, uncomment below
 #print('We threw away... ' + str(len(thrown)) + " authors because their last name only has 1 letter.")
 
 print("We start building/loading the network")
@@ -74,7 +74,8 @@ print('----------------------------------------------------')
 
 df2 = df1[df1['Author'].apply(lambda s : len(s) >= 6)]
 df3 = df2.copy()
-#clean data 
+
+#Clean source and title paper of weird characters 
 df3['Title paper'] = df2['Title paper'].apply(
     lambda s : s.lower()
 ).apply(
@@ -111,8 +112,6 @@ print('Finished processing the titles and the sources')
 print('----------------------------------------------------')
 
 df4 = df3.drop(columns=['Author'])
-df4.head()
-
 titles_num = df4.shape[0]
 fired_titles_num = df4[df4['Label'] == 1].shape[0]
 notfired_titles_num = df4[df4['Label'] == 0].shape[0]
