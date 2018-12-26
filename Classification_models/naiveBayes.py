@@ -22,23 +22,27 @@ if(args.test_size == None):
 else:
     TEST_SIZE = args.test_size
 
-data =  pd.read_csv('~jose/JoseNinaAlexML4/JoseNinaAlexML/data/data_preprocessed.csv')
-
-### all vectors are now represented as strings. Represent as arrays of floats.
-data['Title w2v'] = data['Title w2v'].apply(lambda s: [float(char) for char in s.strip('[]').replace('\n', '').split()])
-data['Source w2v'] = data['Source w2v'].apply(lambda s: [float(char) for char in s.strip('[]').replace('\n', '').split()])
-data['Title w2vtf'] = data['Title w2vtf'].apply(lambda s: [float(char) for char in s.strip('[]').replace('\n', '').split()])
-data['Source w2vtf'] = data['Source w2vtf'].apply(lambda s: [float(char) for char in s.strip('[]').replace('\n', '').split()])
+data =  pd.read_csv('../data/data_preprocessed.csv')
 
 data_train, data_test = train_test_split(data, test_size=TEST_SIZE) # random_state = 0
 print('Size of test set: ', str(len(data_test)), ' size of train set: ', str(len(data_train)))
 data_train = data_train.reset_index(drop = True)
 data_test = data_test.reset_index(drop = True)
-#########
-X = np.array([data_train['Title w2v'][i]+[data_train['Num Fired'][i]]+[data_train['Num not fired'][i]] +[data_train['No titles'][i]] for i in range(len(data_train))])
-y = data_train['Label'].values
 
-Xtest = np.array([data_test['Title w2v'][i]+[data_test['Num Fired'][i]]+[data_test['Num not fired'][i]] +[data_test['No titles'][i]] for i in range(len(data_test))])
-ytest = data_test['Label'].values
+X_train = data_train['Title paper']
+y_train = data_train['Label']
 
-############################
+X_test = data_test['Title paper']
+y_test = data_test['Label']
+
+from sklearn.feature_extraction.text import TfidfVectorizer
+tfidf_vect = TfidfVectorizer()
+X_train_tfidf = tfidf_vect.fit_transform(X_train)
+
+X_test_tfidf = tfidf_vect.transform(X_test)
+
+
+from sklearn.naive_bayes import MultinomialNB
+clf = MultinomialNB().fit(X_train_tfidf, y_train)
+
+print('Naive Bayes gives accuracy of {:.2f} when applied to concatenated titles'.format(np.mean(clf.predict(X_test_tfidf) == y_test)))

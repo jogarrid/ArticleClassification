@@ -11,6 +11,8 @@ from textRepresentations import *
 
 from collections import Counter
 
+import sent2vec # epfl-made 
+
 parser = argparse.ArgumentParser(description='Obtaining all the text representations we use for classification.')
 
 args = parser.parse_args()
@@ -18,6 +20,10 @@ args = parser.parse_args()
 print('Data is going to be loaded, text represented as a vector in different ways, and the network of authors built. This could take a while')
 
 word2vec_model = gensim.models.KeyedVectors.load_word2vec_format('data/GoogleNews-vectors-negative300.bin.gz', binary=True)  
+
+sent2vec_model = sent2vec.Sent2vecModel()
+sent2vec_model.load_model('data/wiki_unigrams.bin') # 600 features
+
 
 print('Finished loading googles word2vec pretrained model')
 print('----------------------------------------------------')
@@ -215,10 +221,13 @@ X_source_w2v  = get_mean_w2v_embeddings(X_source, word2vec_model)
 X_title_w2vtf = get_tfidf_w2v_embeddings(X_title, word2vec_model)
 X_source_w2vtf  = get_tfidf_w2v_embeddings(X_source, word2vec_model)
 
+X_title_s2v = get_sent2vec_embeddings(X_title, sent2vec_model)
+
 df.loc[:,'Title w2v'] = pd.Series(X_title_w2v, index=df.index)
 df.loc[:,'Source w2v'] = pd.Series(X_title_w2v, index=df.index)
 df.loc[:,'Title w2vtf'] = pd.Series(X_title_w2vtf, index=df.index)
 df.loc[:,'Source w2vtf'] = pd.Series(X_title_w2vtf, index=df.index)
+df.loc[:,'sent2vec'] = pd.Series(X_title_s2v, index=df.index)
 
 #MIssing, we need to either do or not talk about this on the report
 #df.loc[:,'Title tf-idf'] = pd.Series(X_title_tf, index=df.index)
