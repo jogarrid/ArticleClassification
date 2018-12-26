@@ -28,7 +28,7 @@ if(args.test_size == None):
 else:
     TEST_SIZE = args.test_size
 
-data =  pd.read_csv('~jose/JoseNinaAlexML4/JoseNinaAlexML/data/data_preprocessed.csv')
+data =  pd.read_csv('../data/data_preprocessed.csv')
 
 ### all vectors are now represented as strings. Represent as arrays of floats.
 data['Title w2v'] = data['Title w2v'].apply(lambda s: [float(char) for char in s.strip('[]').replace('\n', '').split()])

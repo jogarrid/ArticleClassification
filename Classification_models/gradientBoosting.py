@@ -29,7 +29,7 @@ data['Title w2v'] = data['Title w2v'].apply(lambda s: [float(char) for char in s
 data['Source w2v'] = data['Source w2v'].apply(lambda s: [float(char) for char in s.strip('[]').replace('\n', '').split()])
 data['Title w2vtf'] = data['Title w2vtf'].apply(lambda s: [float(char) for char in s.strip('[]').replace('\n', '').split()])
 data['Source w2vtf'] = data['Source w2vtf'].apply(lambda s: [float(char) for char in s.strip('[]').replace('\n', '').split()])
-data['sent2vec'] = data['Source w2vtf'].apply(lambda s: [float(char) for char in s])
+data['sent2vec'] = data['sent2vec'].apply(lambda s: [float(char) for char in s.strip('[]').replace('\n', '').split()])
 
 data_train, data_test = train_test_split(data, test_size=TEST_SIZE) # random_state = 0
 print('Size of test set: ', str(len(data_test)), ' size of train set: ', str(len(data_train)))
