@@ -10,7 +10,7 @@ import numpy as np
 #For reproducibility of results
 np.random.seed(100)
 
-parser = argparse.ArgumentParser(description='Implement a support vector machines method for classification')
+parser = argparse.ArgumentParser(description='Implement naive bayes method for classification')
 
 parser.add_argument('-t', '--test_size', type=float, required = False,
                     help='fraction of the data used for test (between 0 and 1)')
@@ -38,7 +38,6 @@ y_test = data_test['Label']
 from sklearn.feature_extraction.text import TfidfVectorizer
 tfidf_vect = TfidfVectorizer()
 X_train_tfidf = tfidf_vect.fit_transform(X_train)
-
 X_test_tfidf = tfidf_vect.transform(X_test)
 
 

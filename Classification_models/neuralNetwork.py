@@ -54,7 +54,7 @@ scalar.fit(X_train)
 X_train = scalar.transform(X_train)
 # define and fit the final model
 model = Sequential()
-model.add(Dense(2048, input_dim=303, activation='relu'))
+model.add(Dense(4096, input_dim=303, activation='relu'))
 model.add(Dense(2048, activation='relu'))
 model.add(Dense(1024, activation='relu'))
 model.add(Dense(512, activation='relu'))
