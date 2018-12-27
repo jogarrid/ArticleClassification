@@ -1,7 +1,9 @@
 How to run the code?
 
 Download https://drive.google.com/file/d/0B7XkCwpI5KDYNlNUTTlSS21pQmM/edit
-place it in the data folder
+place it in the data folder.
+
+For the import "import sent2vec" in loadData.py to work, follow the instructions in https://github.com/epfml/sent2vec . 
 
 Organization of the code:
 
