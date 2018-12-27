@@ -10,8 +10,6 @@ place it in the data folder.
 
 For the import "import sent2vec" in loadData.py to work, follow the instructions in https://github.com/epfml/sent2vec . 
 
-Organization of the code:
-
 web_crawler: contains the scrapping of Web of Science to get paper information (title, author, co-authors, publication type, abstract, title etc.) and creates fired.csv and not_fired.csv, lists of papers by fired and not fired authors. fired.csv is the result of webscrapping WoS looking for all the papers the authors in the list Dismis_Acad_List_cl.txt published, and not_fired.csv is the result of webscrapping WoS looking for all the papers published by their co-authors who were not fired.
 
 data_analysis: contains 3 notebook for the preliminary study of the dataset
