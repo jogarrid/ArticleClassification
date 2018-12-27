@@ -14,6 +14,10 @@ This functions are later called from within LoadData.py
 """
 
 def get_mean_w2v_embeddings(titles,word2vec_model):
+    """ 
+    Using the model WORD2VEC_MODEL which has been pretrained (it is google's pretrained model in 
+    our case), and that associates words to vectors, go from a sentence (TITLE) to a vector by summing the vectorial representation of all the words in a title
+    """
     embs = []
     for title in titles:
         title_emb = np.zeros(300)
@@ -21,19 +25,22 @@ def get_mean_w2v_embeddings(titles,word2vec_model):
         for w in words:
             if w in word2vec_model:
                 scalar = 1.
-#                 scalar = 1. / len(words)  
+#               scalar = 1. / len(words)  
                 vector = word2vec_model[w]   
                 title_emb += scalar * vector
         embs.append(title_emb)
     return embs
 
 def get_tfidf_w2v_embeddings(titles, word2vec_model):
+    """ 
+    Using the model WORD2VEC_MODEL which has been pretrained (it is google's pretrained model in 
+    our case), and that associates words to vectors, go from a sentence (TITLE) to a vector by summing the vectorial representation of all the words in TITLE
+    multiplying the vector of every word by the tf-idf measure of its relative importance in the text.
+    """
     tfidf_vect = TfidfVectorizer()
-    
     titles_tfidf_matrix = tfidf_vect.fit_transform(titles)
     # have matrix, where rows are titles and cols are words from vocabulary
     tfidf_words_indices = {word : index for (word, index) in tfidf_vect.vocabulary_.items()}
-    
     embs = []
     for i in range(len(titles)):
         title = titles.iloc[i]
@@ -57,7 +64,7 @@ def get_tfidf_w2v_embeddings(titles, word2vec_model):
                     scalar = matrix_row_dict.get(word_index, 0)
                 else:
                     scalar = 1. / len(words) # take scalar as in mean
-#                     scalar = 1.
+#                   scalar = 1.
                 
                 title_emb += scalar * vector
                 
@@ -65,6 +72,9 @@ def get_tfidf_w2v_embeddings(titles, word2vec_model):
     return embs
 
 def get_sent2vec_embeddings(titles, sent2vec_model):
+    """
+    Find vectorial representation of the sentence TITLE using the sent2vec model
+    """
     lists = sent2vec_model.embed_sentences(titles.values)
     return [np.asarray(lists[i]) for i in range(len(lists))]
 

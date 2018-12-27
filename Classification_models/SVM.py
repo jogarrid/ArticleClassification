@@ -29,21 +29,55 @@ data['Title w2v'] = data['Title w2v'].apply(lambda s: [float(char) for char in s
 data['Source w2v'] = data['Source w2v'].apply(lambda s: [float(char) for char in s.strip('[]').replace('\n', '').split()])
 data['Title w2vtf'] = data['Title w2vtf'].apply(lambda s: [float(char) for char in s.strip('[]').replace('\n', '').split()])
 data['Source w2vtf'] = data['Source w2vtf'].apply(lambda s: [float(char) for char in s.strip('[]').replace('\n', '').split()])
+data['sent2vec'] = data['sent2vec'].apply(lambda s: [float(char) for char in s.strip('[]').replace('\n', '').split()])
 
 data_train, data_test = train_test_split(data, test_size=TEST_SIZE) # random_state = 0
 print('Size of test set: ', str(len(data_test)), ' size of train set: ', str(len(data_train)))
-
 data_train = data_train.reset_index(drop = True)
 data_test = data_test.reset_index(drop = True)
 
-X = np.array([data_train['Title w2v'][i]+[data_train['Num Fired'][i]]+[data_train['Num not fired'][i]] +[data_train['No titles'][i]] for i in range(len(data_train))])
-y = data_train['Label'].values
+from catboost import CatBoostClassifier
 
-Xtest = np.array([data_test['Title w2v'][i]+[data_test['Num Fired'][i]]+[data_test['Num not fired'][i]] +[data_test['No titles'][i]] for i in range(len(data_test))])
-ytest = data_test['Label'].values
+X_train = np.array([data_train['Title w2v'][i]+[data_train['Num Fired'][i]]+[data_train['Num not fired'][i]] +[data_train['No titles'][i]] for i in range(len(data_train))])
+y_train = data_train['Label']
 
-clf = svm.SVC(gamma='scale')
-clf.fit(X, y)  
+X_test = np.array([data_test['Title w2v'][i]+[data_test['Num Fired'][i]]+[data_test['Num not fired'][i]] +[data_test['No titles'][i]] for i in range(len(data_test))])
+y_test = data_test['Label']
 
-acc = sum(clf.predict(Xtest) == ytest) / len(ytest)
-print('Using support vector machines we get an accuracy of: ', str(acc))
+clf = svm.SVC(gamma=0.001,C=1)
+clf.fit(X_train, y_train)  
+
+preds_class = clf.predict(X_test) 
+
+w2v_res = np.mean(preds_class == y_test)
+
+print('Support vector machines give accuracy of {:.2f} when applied to w2v mean concatenated titles'.format(w2v_res))
+
+X_train = np.array([data_train['Title w2vtf'][i]+[data_train['Num Fired'][i]]+[data_train['Num not fired'][i]] +[data_train['No titles'][i]] for i in range(len(data_train))])
+y_train = data_train['Label']
+
+X_test = np.array([data_test['Title w2vtf'][i]+[data_test['Num Fired'][i]]+[data_test['Num not fired'][i]] +[data_test['No titles'][i]] for i in range(len(data_test))])
+y_test = data_test['Label']
+
+clf = svm.SVC(gamma=0.001,C=1, verbose = 2)
+clf.fit(X_train, y_train)  
+
+preds_class = clf.predict(X_test) 
+
+w2vtf_res = np.mean(preds_class == y_test)
+
+print('Support vector machines give accuracy of {:.2f} when applied to w2v concatenated titles with term frequency'.format(w2vtf_res))
+
+X_train = np.array([data_train['sent2vec'][i]+[data_train['Num Fired'][i]]+[data_train['Num not fired'][i]] +[data_train['No titles'][i]] for i in range(len(data_train))])
+y_train = data_train['Label']
+
+X_test = np.array([data_test['sent2vec'][i]+[data_test['Num Fired'][i]]+[data_test['Num not fired'][i]] +[data_test['No titles'][i]] for i in range(len(data_test))])
+y_test = data_test['Label']
+
+clf = svm.SVC(gamma=0.001,C=1, verbose = 2)
+clf.fit(X_train, y_train)  
+
+preds_class = clf.predict(X_test) 
+s2v_res = np.mean(preds_class == y_test)
+
+print('Support vector machines gives accuracy of {:.2f} when applied to sent2vec'.format(s2v_res))

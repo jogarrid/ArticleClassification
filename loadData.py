@@ -11,7 +11,7 @@ from textRepresentations import *
 
 from collections import Counter
 
-#import sent2vec # epfl-made 
+import sent2vec # epfl-made 
 
 parser = argparse.ArgumentParser(description='Obtaining all the text representations we use for classification.')
 
@@ -205,13 +205,6 @@ df.loc[:,'Source w2v'] = pd.Series(X_title_w2v, index=df.index)
 df.loc[:,'Title w2vtf'] = pd.Series(X_title_w2vtf, index=df.index)
 df.loc[:,'Source w2vtf'] = pd.Series(X_title_w2vtf, index=df.index)
 df.loc[:,'sent2vec'] = pd.Series(X_title_s2v, index=df.index)
-
-#MIssing, we need to either do or not talk about this on the report
-#df.loc[:,'Title tf-idf'] = pd.Series(X_title_tf, index=df.index)
-#df.loc[:,'Source tf-idf'] = pd.Series(X_title_tf, index=df.index)
-
-#df.loc[:,'Title s2v'] = pd.Series(X_title_s2v, index=df.index)
-#df.loc[:,'Source s2v'] = pd.Series(X_title_s2v, index=df.index)
 
 df.to_csv('data/data_preprocessed.csv')
 
