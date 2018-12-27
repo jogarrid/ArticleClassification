@@ -12,6 +12,8 @@ from keras.layers import Dense, Dropout
 from sklearn.datasets.samples_generator import make_blobs
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from keras.optimizers import Adam
+from sklearn.model_selection import cross_val_score
+
 
 #For reproducibility of results
 np.random.seed(100)
@@ -64,5 +66,7 @@ model.compile(loss='binary_crossentropy', optimizer=Adam(lr=0.00001, beta_1=0.9,
 model.fit(X_train, y_train, epochs=100,batch_size = 50, verbose=2)
 ypred = model.predict_classes(X_test)
 acc = sum(ypred[:,0] == y_test)/len(y_test)
+scores = cross_val_score(model, X_test, y_test, cv=6)                                  
 
-print('Using a deep neural netwrok we get an accuracy in the test set of:  ', acc)
+
+print('Using a deep neural netwrok we get an accuracy in the test set of:  ', round(np.mean(scores),3))

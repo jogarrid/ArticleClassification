@@ -6,6 +6,7 @@ import pandas as pd
 from sklearn import svm
 from sklearn.model_selection import train_test_split
 import numpy as np
+from sklearn.model_selection import cross_val_score
 
 #For reproducibility of results
 np.random.seed(100)
@@ -43,5 +44,6 @@ X_test_tfidf = tfidf_vect.transform(X_test)
 
 from sklearn.naive_bayes import MultinomialNB
 clf = MultinomialNB().fit(X_train_tfidf, y_train)
+scores = cross_val_score(clf, X_test_tfidf, y_test, cv=6)
 
-print('Naive Bayes gives accuracy of {:.2f} when applied to concatenated titles'.format(np.mean(clf.predict(X_test_tfidf) == y_test)))
+print('Naive Bayes gives accuracy of {:.2f} when applied to concatenated titles'.format(round(np.mean(scores),3)))

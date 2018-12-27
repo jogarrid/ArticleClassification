@@ -7,6 +7,8 @@ from sklearn import svm
 from sklearn.model_selection import train_test_split
 import numpy as np
 from catboost import CatBoostClassifier
+from sklearn.model_selection import cross_val_score
+
 
 #For reproducibility of results
 np.random.seed(100)
@@ -51,9 +53,7 @@ if(INCLUDE_PARAM):
 
     X_test = np.array([data_test['Title w2v'][i]+[data_test['Num Fired'][i]]+[data_test['Num not fired'][i]] +[data_test['No titles'][i]] for i in range(len(data_test))])
     y_test = data_test['Label']
-    print('ho')
 else: 
-    print('hey')
     X_train = np.array([data_train['Title w2v'][i] for i in range(len(data_train))])
     y_train = data_train['Label']
 
@@ -64,9 +64,10 @@ model = CatBoostClassifier(iterations=20, learning_rate=1e-1, depth=6, loss_func
 model.fit(X_train, y_train)
 preds_class = model.predict(X_test)
 
-w2v_res = np.mean(preds_class == y_test)
+scoresw2v = cross_val_score(model, X_test, y_test, cv=6)
 
-print('Gradient boosting via catboost gives accuracy of {:.2f} when applied to w2v mean concatenated titles'.format(w2v_res))
+
+print('Gradient boosting via catboost gives accuracy of {:.2f} when applied to w2v mean concatenated titles'.format(round(np.mean(scoresw2v),3)))
 
 if(INCLUDE_PARAM):
     X_train = np.array([data_train['Title w2vtf'][i]+[data_train['Num Fired'][i]]+[data_train['Num not fired'][i]] +[data_train['No titles'][i]] for i in range(len(data_train))])
@@ -86,9 +87,12 @@ model = CatBoostClassifier(iterations=20, learning_rate=1e-1, depth=6, loss_func
 model.fit(X_train, y_train)
 preds_class = model.predict(X_test)
 
-w2vtf_res = np.mean(preds_class == y_test)
+#w2vtf_res = np.mean(preds_class == y_test)
 
-print('Gradient boosting via catboost gives accuracy of {:.2f} when applied to w2v concatenated titles with term frequency'.format(w2vtf_res))
+scoresvtf = cross_val_score(model, X_test, y_test, cv=6)
+
+
+print('Gradient boosting via catboost gives accuracy of {:.2f} when applied to w2v concatenated titles with term frequency'.format(round(np.mean(scoresvtf),3)))
 
 if(INCLUDE_PARAM):
     X_train = np.array([data_train['sent2vec'][i]+[data_train['Num Fired'][i]]+[data_train['Num not fired'][i]] +[data_train['No titles'][i]] for i in range(len(data_train))])
@@ -110,4 +114,6 @@ preds_class = model.predict(X_test)
 
 s2v_res = np.mean(preds_class == y_test)
 
-print('Gradient boosting via catboost gives accuracy of {:.2f} when applied to sent2vec'.format(s2v_res))
+scoress2v = cross_val_score(model, X_test, y_test, cv=6)
+
+print('Gradient boosting via catboost gives accuracy of {:.2f} when applied to sent2vec'.format(round(np.mean(scoress2v),3)))

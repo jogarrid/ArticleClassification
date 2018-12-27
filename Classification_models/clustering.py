@@ -17,6 +17,7 @@ from sklearn.cluster import KMeans
 from sklearn.datasets import make_blobs
 
 from sklearn import cluster, datasets, mixture
+from sklearn.model_selection import cross_val_score
 
 
 def reduce_dim(method,label,state):
@@ -67,7 +68,8 @@ data_train, data_test = train_test_split(data, test_size=TEST_SIZE) # random_sta
 print('Size of test set: ', str(len(data_test)), ' size of train set: ', str(len(data_train)))
 data_train = data_train.reset_index(drop = True)
 data_test = data_test.reset_index(drop = True)
-
+X_test = np.array([data_test['Title w2v'][i] for i in range(len(data_test))])
+y_test = data_test['Label']
 
 #config values
 random_state = 170
@@ -91,7 +93,8 @@ true_labels=list(data_test.Label)
 #compute accuracy
 a = y_pred-true_labels
 acc = list(a).count(0)/(len(a))
-print(acc)
+print('KMeans gives accuracy of {:.2f} when applied to w2v mean concatenated titles'.format(acc))
+
 
 #seperate when label=0 and label=1 in the predicted model on the entire dataset and reduce dim to 2
 #flatten the dataset to get a matrix nb_itemsx300 (300 is the length of w2v vectors)
@@ -115,9 +118,11 @@ gmm.fit_predict(data_flat_train)
 y_pred_gmm = gmm.predict(data_flat_test)
 data_test['prediction gaussian']=y_pred_gmm
 
+
 a = y_pred_gmm-true_labels
 acc = list(a).count(0)/(len(a))
 print(acc)
+print('Haussian Mixture Model gives accuracy of {:.2f} when applied to w2v mean concatenated titles'.format(acc))
 
 y_pred_total = gmm.fit_predict(data_reduced)
 data['prediction gaussian'] = y_pred_total

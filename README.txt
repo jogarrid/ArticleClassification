@@ -1,3 +1,8 @@
+Installations :
+
+pip install catboost
+pip install Keras
+
 How to run the code?
 
 Download https://drive.google.com/file/d/0B7XkCwpI5KDYNlNUTTlSS21pQmM/edit

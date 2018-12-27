@@ -6,6 +6,8 @@ import pandas as pd
 from sklearn import svm
 from sklearn.model_selection import train_test_split
 import numpy as np
+from sklearn.model_selection import cross_val_score
+
 
 #For reproducibility of results
 np.random.seed(100)
@@ -62,9 +64,11 @@ clf.fit(X_train, y_train)
 
 preds_class = clf.predict(X_test) 
 
-w2v_res = np.mean(preds_class == y_test)
+#scoresw2v = cross_val_score(clf, X_test, y_test, cv=4) 
+scoresw2v = cross_val_score(clf, np.array([data['Title w2v'][i] for i in range(len(data))]), data['Label'], cv=6)                                  
 
-print('Support vector machines give accuracy of {:.2f} when applying to w2v sum of concatenated titles'.format(w2v_res))
+
+print('Support vector machines give accuracy of {:.2f} when applying to w2v sum of concatenated titles'.format(round(np.mean(scoresw2v),3)))
 
 if(INCLUDE_PARAM):
     X_train = np.array([data_train['Title w2vtf'][i]+[data_train['Num Fired'][i]]+[data_train['Num not fired'][i]] +[data_train['No titles'][i]] for i in range(len(data_train))])
@@ -85,9 +89,10 @@ clf.fit(X_train, y_train)
 
 preds_class = clf.predict(X_test) 
 
-w2vtf_res = np.mean(preds_class == y_test)
+#w2vtf_res = np.mean(preds_class == y_test)
+scoresvtf = cross_val_score(clf, np.array([data['Title w2vtf'][i] for i in range(len(data))]), data['Label'], cv=6)                                  
 
-print('Support vector machines give accuracy of {:.2f} when applying w2v sum multiplying with term frequency to concatenated titles'.format(w2vtf_res))
+print('Support vector machines give accuracy of {:.2f} when applying w2v sum multiplying with term frequency to concatenated titles'.format(round(np.mean(scoresvtf),3)))
 
 if(INCLUDE_PARAM):
     X_train = np.array([data_train['sent2vec'][i]+[data_train['Num Fired'][i]]+[data_train['Num not fired'][i]] +[data_train['No titles'][i]] for i in range(len(data_train))])
@@ -106,7 +111,9 @@ else:
 clf = svm.SVC(gamma=0.001,C=1, verbose = 2)
 clf.fit(X_train, y_train)  
 
-preds_class = clf.predict(X_test) 
-s2v_res = np.mean(preds_class == y_test)
 
-print('Support vector machines gives accuracy of {:.2f} when applied to sent2vec'.format(s2v_res))
+#scores = cross_val_score(clf, X_test, y_test, cv=4)   
+scores = cross_val_score(clf, np.array([data['sent2vec'][i] for i in range(len(data))]), data['Label'], cv=6)                                  
+
+
+print('Support vector machines gives accuracy of {0} when applied to sent2vec'.format(round(np.mean(scores),3)))
